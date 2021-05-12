@@ -16,14 +16,17 @@
       </thead>
       <tbody>
       <tr v-for="(person, id) in Filters" :key="person.id">
-        <td>{{ id+1}}</td>
+        <td>{{ id + 1 }}</td>
         <td>{{ person.last_name }}</td>
         <td>{{ person.first_name }}</td>
         <td>{{ person.email }}</td>
         <td>
-          <router-link :to="'/table/'+person.id" v-slot="navigator">
-            <button class="btn" @click="navigator">Посмотреть</button>
-          </router-link>
+          <button
+              @click="goToViewTable(person.id)"
+              class="btn"
+          >
+            Посмотреть
+          </button>
           <button class="btn danger" @click="remove">Удалить</button>
         </td>
       </tr>
@@ -32,24 +35,35 @@
   </div>
 </template>
 <script>
-import { inject, ref, computed } from 'vue'
+import axios from 'axios'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+
 export default {
-  setup() {
-    const peopleList = inject('people')
+  async setup() {
+    const router = useRouter()
+    const { data: peopleList } = await axios.get('http://localhost:3000/people')
+
     const filter = ref('')
     function remove(idx) {
       const element = peopleList.value.filter(el=> el.id !== idx)
-      peopleList.value.splice(element,1)
+      peopleList.value.splice(element, 1)
     }
+
+    const goToViewTable = (id) => {
+      router.push(`/table/${id}`)
+    }
+
     return{
       peopleList,
       remove,
       filter,
       Filters: computed(()=> {
-        return peopleList.value.filter( el => {
+        return peopleList.filter( el => {
           return el.first_name[0].toLowerCase().includes(filter.value.toLowerCase())
         })
-      })
+      }),
+      goToViewTable
     }
   }
 }

@@ -3,10 +3,10 @@
     <router-link to="/main" class="text-white">Вернуться к списку</router-link>
   </div>
   <div class="card">
-    <div>
-      <p><strong>Фамилия:</strong> {{}}</p>
-      <p><strong>Имя:</strong> {{}}</p>
-      <p><strong>"Электронная почта:</strong> {{}}</p>
+    <div v-if="person">
+      <p><strong>Фамилия:</strong> {{ person.last_name }}</p>
+      <p><strong>Имя:</strong> {{ person.first_name }}</p>
+      <p><strong>"Электронная почта:</strong> {{ person.email }}</p>
     </div>
     <div>
       <img src="#" title="dsa">
@@ -15,17 +15,28 @@
 </template>
 
 <script>
-import {inject, ref} from 'vue'
+import axios from 'axios'
 import { useRoute } from 'vue-router'
+
 export default {
   setup() {
-    const people = inject('people')
     const route = useRoute()
-    const peopleList = ref(route)
-    return{
-      people,
-      peopleList
+    const id = route.params.id
+
+    return {
+      id
     }
+  },
+  data () {
+    return {
+      person: null
+    }
+  },
+  mounted () {
+    axios.get(`http://localhost:3000/people/${this.id}`)
+        .then(({ data }) => {
+          data && (this.person = data)
+        })
   },
 
   name: "view"
