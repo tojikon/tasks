@@ -4,9 +4,7 @@
       <h1>Список пользователей</h1>
       <button class="btn primary" @click="flag = true">Создать</button>
     </div>
-    <Suspense>
-      <RequestTable />
-    </Suspense>
+    <RequestTable />
 <!--    <teleport to="body" >-->
 <!--      <request-modal-->
 <!--          v-if="flag"-->

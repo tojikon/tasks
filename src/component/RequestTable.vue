@@ -15,8 +15,8 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(person, id) in Filters" :key="person.id">
-        <td>{{ id + 1 }}</td>
+      <tr v-for="(person, idx) in Filters" :key="person.id">
+        <td>{{ idx + 1 }}</td>
         <td>{{ person.last_name }}</td>
         <td>{{ person.first_name }}</td>
         <td>{{ person.email }}</td>
@@ -27,7 +27,7 @@
           >
             Посмотреть
           </button>
-          <button class="btn danger" @click="remove">Удалить</button>
+          <button class="btn danger" @click="remove(person.id)">Удалить</button>
         </td>
       </tr>
       </tbody>
@@ -40,30 +40,46 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 export default {
-  async setup() {
-    const router = useRouter()
-    const { data: peopleList } = await axios.get('http://localhost:3000/people')
-
+  setup() {
     const filter = ref('')
-    function remove(idx) {
-      const element = peopleList.value.filter(el=> el.id !== idx)
-      peopleList.value.splice(element, 1)
-    }
+    const router = useRouter()
 
     const goToViewTable = (id) => {
       router.push(`/table/${id}`)
     }
 
-    return{
-      peopleList,
-      remove,
+    return {
       filter,
-      Filters: computed(()=> {
-        return peopleList.filter( el => {
-          return el.first_name[0].toLowerCase().includes(filter.value.toLowerCase())
-        })
-      }),
       goToViewTable
+    }
+  },
+  data() {
+    return {
+      peopleList: []
+    }
+  },
+  computed: {
+    Filters () {
+      console.clear()
+      console.log('filter', this.filter)
+      return this.peopleList
+          .filter(p => {
+        return this.filter ? p.first_name.toLowerCase().includes(this.filter.toLowerCase()) : true
+      })
+    }
+  },
+  mounted () {
+    axios.get('http://localhost:3000/people').then(({ data }) => {
+      this.peopleList = data
+    })
+
+  },
+  methods: {
+    remove (id) {
+      const personIdx = this.peopleList.findIndex(p => p.id === id)
+      this.peopleList.splice(personIdx, 1)
+
+      // axios.delete(`http://localhost:3000/people/${id}`)
     }
   }
 }
